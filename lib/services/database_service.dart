@@ -1,5 +1,6 @@
 import 'package:flutter_sqflite_example/models/breed.dart';
 import 'package:flutter_sqflite_example/models/dog.dart';
+import 'package:flutter_sqflite_example/models/prorole.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,7 +24,7 @@ class DatabaseService {
     // Set the path to the database. Note: Using the `join` function from the
     // `path` package is best practice to ensure the path is correctly
     // constructed for each platform.
-    final path = join(databasePath, 'flutter_sqflite_database.db');
+    final path = join(databasePath, 'flutter_sqflite_database1.db');
 
     // Set the version. This executes the onCreate function and provides a
     // path to perform database upgrades and downgrades.
@@ -38,6 +39,10 @@ class DatabaseService {
   // When the database is first created, create a table to store breeds
   // and a table to store dogs.
   Future<void> _onCreate(Database db, int version) async {
+    // Run the CREATE prorole TABLE statement on the database.
+    await db.execute(
+    'CREATE TABLE prorole(id INTEGER PRIMARY KEY, description TEXT,active BOOLEAN, rightid INTEGER)',
+    );
     // Run the CREATE {breeds} TABLE statement on the database.
     await db.execute(
       'CREATE TABLE breeds(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
@@ -46,6 +51,7 @@ class DatabaseService {
     await db.execute(
       'CREATE TABLE dogs(id INTEGER PRIMARY KEY, name TEXT, age INTEGER, color INTEGER, breedId INTEGER, FOREIGN KEY (breedId) REFERENCES breeds(id) ON DELETE SET NULL)',
     );
+    
   }
 
   // Define a function that inserts breeds into the database
@@ -137,5 +143,73 @@ class DatabaseService {
   Future<void> deleteDog(int id) async {
     final db = await _databaseService.database;
     await db.delete('dogs', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Define a function that inserts proroles into the database
+  Future<void> insertProrole(Prorole prorole) async {
+    // Get a reference to the database.
+    final db = await _databaseService.database;
+
+    // Insert the Prorole into the correct table. You might also specify the
+    // `conflictAlgorithm` to use in case the same prorole is inserted twice.
+    //
+    // In this case, replace any previous data.
+    await db.insert(
+      'prorole',
+      prorole.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+
+  // A method that retrieves all the proroles from the proroles table.
+  Future<List<Prorole>> proroles() async {
+    // Get a reference to the database.
+    final db = await _databaseService.database;
+
+    // Query the table for all the Prorole.
+    final List<Map<String, dynamic>> maps = await db.query('prorole');
+
+    // Convert the List<Map<String, dynamic> into a List<Prorole>.
+    return List.generate(maps.length, (index) => Prorole.fromMap(maps[index]));
+  }
+
+  Future<Prorole> prorole(int id) async {
+    final db = await _databaseService.database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('proroles', where: 'id = ?', whereArgs: [id]);
+    return Prorole.fromMap(maps[0]);
+  }
+
+
+  // A method that updates a prorole data from the proroles table.
+  Future<void> updateProrole(Prorole prorole) async {
+    // Get a reference to the database.
+    final db = await _databaseService.database;
+
+    // Update the given prorole
+    await db.update(
+      'proroles',
+      prorole.toMap(),
+      // Ensure that the Prorole has a matching id.
+      where: 'id = ?',
+      // Pass the Prorole's id as a whereArg to prevent SQL injection.
+      whereArgs: [prorole.id],
+    );
+  }
+
+  // A method that deletes a prorole data from the proroles table.
+  Future<void> deleteProrole(int id) async {
+    // Get a reference to the database.
+    final db = await _databaseService.database;
+
+    // Remove the Prorole from the database.
+    await db.delete(
+      'proroles',
+      // Use a `where` clause to delete a specific prorole.
+      where: 'id = ?',
+      // Pass the Prorole's id as a whereArg to prevent SQL injection.
+      whereArgs: [id],
+    );
   }
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sqflite_example/common_widgets/dog_builder.dart';
 import 'package:flutter_sqflite_example/common_widgets/breed_builder.dart';
+import 'package:flutter_sqflite_example/common_widgets/prorole_builder.dart';
 import 'package:flutter_sqflite_example/models/breed.dart';
 import 'package:flutter_sqflite_example/models/dog.dart';
 import 'package:flutter_sqflite_example/pages/breed_form_page.dart';
+import 'package:flutter_sqflite_example/models/prorole.dart';
+import 'package:flutter_sqflite_example/pages/prorole_form_page.dart';
 import 'package:flutter_sqflite_example/pages/dog_form_page.dart';
 import 'package:flutter_sqflite_example/services/database_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -26,6 +29,10 @@ class _HomePageState extends State<HomePage> {
     return await _databaseService.breeds();
   }
 
+  Future<List<Prorole>> _getProroles() async {
+    return await _databaseService.proroles();
+  }
+
   Future<void> _onDogDelete(Dog dog) async {
     await _databaseService.deleteDog(dog.id!);
     setState(() {});
@@ -34,7 +41,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Dog Database'),
@@ -48,6 +55,10 @@ class _HomePageState extends State<HomePage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Text('Breeds'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Text('Proroles'),
               ),
             ],
           ),
@@ -73,11 +84,29 @@ class _HomePageState extends State<HomePage> {
             BreedBuilder(
               future: _getBreeds(),
             ),
+            ProroleBuilder(
+              future: _getProroles(),
+            ),
           ],
         ),
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (_) => ProroleFormPage(),
+                        fullscreenDialog: true,
+                      ),
+                    )
+                    .then((_) => setState(() {}));
+              },
+              heroTag: 'addProrole',
+              child: FaIcon(FontAwesomeIcons.plus),
+            ),
+            SizedBox(height: 12.0),
             FloatingActionButton(
               onPressed: () {
                 Navigator.of(context)
