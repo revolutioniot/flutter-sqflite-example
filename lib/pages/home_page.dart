@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sqflite_example/common_widgets/dog_builder.dart';
 import 'package:flutter_sqflite_example/common_widgets/breed_builder.dart';
 import 'package:flutter_sqflite_example/common_widgets/prorole_builder.dart';
+import 'package:flutter_sqflite_example/common_widgets/protask_builder.dart';
 import 'package:flutter_sqflite_example/models/breed.dart';
 import 'package:flutter_sqflite_example/models/dog.dart';
 import 'package:flutter_sqflite_example/pages/breed_form_page.dart';
@@ -10,6 +11,8 @@ import 'package:flutter_sqflite_example/pages/prorole_form_page.dart';
 import 'package:flutter_sqflite_example/pages/dog_form_page.dart';
 import 'package:flutter_sqflite_example/services/database_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_sqflite_example/models/protask.dart';
+import 'package:flutter_sqflite_example/pages/protask_form_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -20,6 +23,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final DatabaseService _databaseService = DatabaseService();
+
+  Future<List<Protask>> _getProtasks() async {
+    return await _databaseService.protasks();
+  }
 
   Future<List<Dog>> _getDogs() async {
     return await _databaseService.dogs();
@@ -41,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Dog Database'),
@@ -59,6 +66,10 @@ class _HomePageState extends State<HomePage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Text('Proroles'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Text('Protasks'),
               ),
             ],
           ),
@@ -87,11 +98,30 @@ class _HomePageState extends State<HomePage> {
             ProroleBuilder(
               future: _getProroles(),
             ),
+            ProtaskBuilder(
+              future: _getProtasks(),
+            ),
+
           ],
         ),
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            FloatingActionButton(
+              onPressed: () {
+              Navigator.of(context)
+                .push(
+                  MaterialPageRoute(
+                  builder: (_) => ProtaskFormPage(),
+                  fullscreenDialog: true,
+                  ),
+                )
+                .then((_) => setState(() {}));
+              },
+              heroTag: 'addProtask',
+              child: FaIcon(FontAwesomeIcons.plus),
+            ),
+            SizedBox(height: 12.0),
             FloatingActionButton(
               onPressed: () {
                 Navigator.of(context)
